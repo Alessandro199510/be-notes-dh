@@ -20,7 +20,6 @@ public class NoteController {
         this.noteService = noteService;
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> getNoteById(@PathVariable Long id) {
         return noteService.findById(id)

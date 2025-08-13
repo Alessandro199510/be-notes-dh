@@ -41,6 +41,10 @@ public class Note {
     )
     private Set<Tag> tags;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
