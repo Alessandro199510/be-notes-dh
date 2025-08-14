@@ -1,11 +1,10 @@
 package com.dh.notes.controller;
 
-import com.dh.notes.dto.requests.NoteRequest;
-import com.dh.notes.dto.responses.NoteResponse;
+import com.dh.notes.dto.requests.TagRequest;
 import com.dh.notes.dto.responses.PageResponse;
+import com.dh.notes.dto.responses.TagResponse;
+import com.dh.notes.service.TagService;
 import com.dh.notes.util.Constans;
-import com.dh.notes.service.NoteService;
-import com.dh.notes.util.enums.NoteStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -13,62 +12,62 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
-@RequestMapping("/api/notes")
+@RequestMapping("/api/tags")
+public class TagController {
 
-public class NoteController {
+    private final TagService TagService;
 
-    private final NoteService noteService;
-
-    public NoteController(
-            NoteService noteService
-    ) {
-        this.noteService = noteService;
+    public TagController(TagService TagService) {
+        this.TagService = TagService;
     }
 
     @GetMapping("/all")
-    public ResponseEntity<PageResponse<NoteResponse>> getAllNotes(
+    public ResponseEntity<PageResponse<TagResponse>> getAllTags(
             @RequestParam(defaultValue = Constans.DEFAULT_PAGE_INIT) int page,
             @RequestParam(defaultValue = Constans.DEFAULT_PAGE_SIZE) int size
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Constans.DEFAULT_SORT_BY).descending());
-        PageResponse<NoteResponse> response = noteService.getAll(pageable);
+        PageResponse<TagResponse> response = TagService.getAll(pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<NoteResponse>> findNotes(
+    public ResponseEntity<PageResponse<TagResponse>> getTagsByUserAndQuery(
             @RequestParam(defaultValue = Constans.DEFAULT_PAGE_INIT) int page,
             @RequestParam(defaultValue = Constans.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(required = false) String search_query,
-            @RequestParam(defaultValue = "ACTIVE") NoteStatus status,
             Authentication authentication
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Constans.DEFAULT_SORT_BY).descending());
-        PageResponse<NoteResponse> response = noteService.findByQueryAndStatusAndUser(pageable, search_query, status, authentication.getName());
+        PageResponse<TagResponse> response = TagService.findByUserAndQuery(pageable, search_query, authentication.getName());
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TagResponse> getTagById(@PathVariable Long id) {
+        return TagService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping
-    public ResponseEntity<NoteResponse> createNote(
-            @RequestBody NoteRequest note,
+    public ResponseEntity<TagResponse> createTag(
+            @RequestBody TagRequest Tag,
             Authentication authentication
     ) {
-        return ResponseEntity.ok(noteService.save(note, authentication.getName()));
+        return ResponseEntity.ok(TagService.save(Tag, authentication.getName()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NoteResponse> updateNote(
-            @PathVariable Long id,
-            @RequestBody NoteRequest note,
-            Authentication authentication
-    ) {
-        return ResponseEntity.ok(noteService.update(id, note, authentication.getName()));
+    public ResponseEntity<TagResponse> updateTag(@PathVariable Long id, @RequestBody TagRequest Tag) {
+        return ResponseEntity.ok(TagService.update(id, Tag));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNote(@PathVariable Long id) {
-        noteService.delete(id);
+    public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
+        TagService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

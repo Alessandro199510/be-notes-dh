@@ -15,10 +15,10 @@ import java.util.Set;
 @Builder
 
 public class Note {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String title;
 
     @Column(columnDefinition = "TEXT")
@@ -33,6 +33,10 @@ public class Note {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @ManyToMany
     @JoinTable(
             name = "note_tags",
@@ -40,10 +44,6 @@ public class Note {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 
     @PrePersist
     public void prePersist() {
