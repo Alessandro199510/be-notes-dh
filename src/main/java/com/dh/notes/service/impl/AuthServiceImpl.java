@@ -41,7 +41,14 @@ public class AuthServiceImpl implements AuthService {
                 .role(Constans.DEFAULT_ROLE)
                 .build();
         userRepository.save(user);
-        return ResponseEntity.ok(Constans.USER_REGISTERED_SUCCESS);
+
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword())
+        );
+
+        String token = jwtService.generateToken((UserDetails) auth.getPrincipal());
+
+        return ResponseEntity.ok(new AuthResponse(user.getEmail(), user.getUsername(), token));
     }
 
     @Override
