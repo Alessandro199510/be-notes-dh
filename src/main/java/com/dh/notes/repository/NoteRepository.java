@@ -30,4 +30,18 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
                            @Param("status") NoteStatus status,
                            @Param("username") String username,
                            Pageable pageable);
+
+    @Query("SELECT DISTINCT n FROM Note n " +
+            "LEFT JOIN n.tags t " +
+            "WHERE (LOWER(n.title) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "   OR LOWER(n.content) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "   OR LOWER(t.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+            "AND n.status = :status " +
+            "AND n.user.username = :username " +
+            "AND (:tagId IS NULL OR t.id = :tagId)")
+    Page<Note> searchNotesByTag(@Param("search") String search,
+                           @Param("status") NoteStatus status,
+                           @Param("username") String username,
+                           @Param("tagId") Long tagId,
+                           Pageable pageable);
 }

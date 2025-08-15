@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
@@ -25,7 +26,6 @@ public class NoteController {
     ) {
         this.noteService = noteService;
     }
-
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<PageResponse<NoteResponse>> getAllNotes(
@@ -43,18 +43,26 @@ public class NoteController {
             @RequestParam(defaultValue = Constans.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(required = false) String search_query,
             @RequestParam(defaultValue = "ACTIVE") NoteStatus status,
+            @RequestParam(required = false) Long tagId,
             Authentication authentication
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Constans.DEFAULT_SORT_BY).descending());
-        PageResponse<NoteResponse> response = noteService.findByQueryAndStatusAndUser(pageable, search_query, status, authentication.getName());
+
+        PageResponse<NoteResponse> response = noteService.findNotes(
+                pageable,
+                search_query,
+                status,
+                tagId,
+                authentication.getName());
+
         return ResponseEntity.ok(response);
+
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NoteResponse> getNoteById(@PathVariable Long id) {
-        return noteService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        NoteResponse noteResponse = noteService.findById(id);
+        return ResponseEntity.ok(noteResponse);
     }
 
     @PostMapping

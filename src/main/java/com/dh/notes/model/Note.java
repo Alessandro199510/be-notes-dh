@@ -1,6 +1,6 @@
 package com.dh.notes.model;
-import com.dh.notes.util.enums.NoteStatus;
 
+import com.dh.notes.util.enums.NoteStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +13,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class Note {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

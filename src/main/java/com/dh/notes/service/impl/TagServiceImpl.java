@@ -3,6 +3,9 @@ package com.dh.notes.service.impl;
 import com.dh.notes.dto.requests.TagRequest;
 import com.dh.notes.dto.responses.PageResponse;
 import com.dh.notes.dto.responses.TagResponse;
+import com.dh.notes.exception.NoteNotFoundException;
+import com.dh.notes.exception.TagAlreadyExistsException;
+import com.dh.notes.exception.UserNotFoundException;
 import com.dh.notes.model.Tag;
 import com.dh.notes.model.User;
 import com.dh.notes.repository.TagRepository;
@@ -42,7 +45,7 @@ public class TagServiceImpl implements TagService {
     @Override
     public PageResponse<TagResponse> findByUserAndQuery(Pageable pageable, String searchQuery, String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(Constans.USER_NOT_FOUND + username));
+                .orElseThrow(() -> new UserNotFoundException(Constans.USER_NOT_FOUND + username));
 
         Page<Tag> tags;
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
@@ -66,12 +69,12 @@ public class TagServiceImpl implements TagService {
     public TagResponse save(TagRequest noteRequest, String username) {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(Constans.USER_NOT_FOUND + username));
+                .orElseThrow(() -> new UserNotFoundException(Constans.USER_NOT_FOUND + username));
 
         Optional<Tag> existingTag = tagRepository.findByNameAndUserId(noteRequest.getName(), user.getId());
 
         if (existingTag.isPresent()) {
-            throw new RuntimeException(Constans.TAG_ALREADY_EXISTS + noteRequest.getName());
+            throw new TagAlreadyExistsException(Constans.TAG_ALREADY_EXISTS + noteRequest.getName());
         }
 
         Tag tag = new Tag();
@@ -86,7 +89,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public TagResponse update(Long id, TagRequest tagRequest) {
         Tag existingTag = tagRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(Constans.NOTE_NOT_FOUND + id));
+                .orElseThrow(() -> new NoteNotFoundException(Constans.TAG_NOT_FOUND + id));
 
         existingTag.setName(tagRequest.getName());
         Tag updatedTag = tagRepository.save(existingTag);
@@ -95,6 +98,8 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void delete(Long id) {
+        Tag existingTag = tagRepository.findById(id)
+                .orElseThrow(() -> new NoteNotFoundException(Constans.TAG_NOT_FOUND + id));
         tagRepository.deleteById(id);
     }
 }

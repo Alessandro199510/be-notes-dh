@@ -71,9 +71,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(c -> c.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs.yaml", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs.yaml", "/v3/api-docs/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(daoAuthenticationProvider())

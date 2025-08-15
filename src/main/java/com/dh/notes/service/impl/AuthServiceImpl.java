@@ -3,6 +3,10 @@ package com.dh.notes.service.impl;
 import com.dh.notes.dto.requests.AuthRequest;
 import com.dh.notes.dto.requests.RegisterRequest;
 import com.dh.notes.dto.responses.AuthResponse;
+import com.dh.notes.exception.EmailAlreadyExistsException;
+import com.dh.notes.exception.InvalidPasswordException;
+import com.dh.notes.exception.UserNotFoundException;
+import com.dh.notes.exception.UsernameAlreadyExistsException;
 import com.dh.notes.model.User;
 import com.dh.notes.repository.UserRepository;
 import com.dh.notes.service.AuthService;
@@ -28,12 +32,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> register(RegisterRequest request) {
+
         if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.badRequest().body(Constans.INVALID_USER_NAME);
+            throw new UsernameAlreadyExistsException(Constans.ALREADY_USER_NAME);
         }
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body(Constans.INVALID_EMAIL);
+            throw new EmailAlreadyExistsException(Constans.ALREADY_EMAIL);
         }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -55,9 +61,13 @@ public class AuthServiceImpl implements AuthService {
     public ResponseEntity<AuthResponse> login(AuthRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException(Constans.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserNotFoundException(Constans.USER_NOT_FOUND));
 
-        Authentication auth = authenticationManager.authenticate(
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidPasswordException(Constans.INVALID_CREDENTIALS);
+        }
+
+            Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), request.getPassword())
         );
         String token = jwtService.generateToken((UserDetails) auth.getPrincipal());

@@ -3,10 +3,14 @@ package com.dh.notes.service.impl;
 import com.dh.notes.dto.requests.NoteRequest;
 import com.dh.notes.dto.responses.NoteResponse;
 import com.dh.notes.dto.responses.PageResponse;
+import com.dh.notes.exception.NoteNotFoundException;
+import com.dh.notes.exception.NoteValidationException;
+import com.dh.notes.exception.UserNotFoundException;
 import com.dh.notes.model.Note;
 import com.dh.notes.model.Tag;
 import com.dh.notes.model.User;
 import com.dh.notes.repository.NoteRepository;
+import com.dh.notes.repository.TagRepository;
 import com.dh.notes.repository.UserRepository;
 import com.dh.notes.service.NoteService;
 import com.dh.notes.util.Constans;
@@ -18,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -26,6 +29,7 @@ public class NoteServiceImpl implements NoteService {
 
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
+    private final TagRepository tagRepository;
 
     private final NoteToNoteResponse noteToNoteResponse;
     private final TagsHelper tagsHelper;
@@ -33,10 +37,12 @@ public class NoteServiceImpl implements NoteService {
     public NoteServiceImpl(
             NoteRepository noteRepository,
             UserRepository userRepository,
+            TagRepository tagRepository,
             NoteToNoteResponse noteToNoteResponse,
             TagsHelper tagsHelper) {
         this.noteRepository = noteRepository;
         this.userRepository = userRepository;
+        this.tagRepository = tagRepository;
         this.noteToNoteResponse = noteToNoteResponse;
         this.tagsHelper = tagsHelper;
     }
@@ -49,13 +55,28 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public PageResponse<NoteResponse> findByQueryAndStatusAndUser(Pageable pageable, String searchQuery, NoteStatus status, String username) {
+    public PageResponse<NoteResponse> findNotes(
+            Pageable pageable,
+            String searchQuery,
+            NoteStatus status,
+            Long tagId,
+            String username
+    ) {
 
-        Page<Note> notes;
+        Page<Note> notes = null;
+
+        if (tagId != null) {
+            tagRepository.findById(tagId)
+                    .orElseThrow(() -> new NoteNotFoundException(Constans.TAG_NOT_FOUND + tagId));
+
+            notes = noteRepository.searchNotesByTag(searchQuery.trim(), status, username, tagId, pageable);
+        }
 
         if (searchQuery != null && !searchQuery.trim().isEmpty()) {
             notes = noteRepository.searchNotes(searchQuery.trim(), status, username, pageable);
-        } else {
+        }
+
+        if (tagId == null && searchQuery == null) {
             notes = noteRepository.findAllByStatus(status, username, pageable);
         }
 
@@ -65,23 +86,24 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public Optional<NoteResponse> findById(Long id) {
+    public NoteResponse findById(Long id) {
         return noteRepository.findById(id)
-                .map(noteToNoteResponse::map);
+                .map(noteToNoteResponse::map)
+                .orElseThrow(() -> new NoteNotFoundException(Constans.NOTE_NOT_FOUND));
     }
 
     @Override
     public NoteResponse save(NoteRequest noteRequest, String username) {
 
         if (noteRequest.getTitle() == null || noteRequest.getTitle().isEmpty()) {
-            throw new RuntimeException(Constans.NOTE_TITLE_REQUIRED);
+            throw new NoteValidationException(Constans.NOTE_TITLE_REQUIRED);
         }
         if (noteRequest.getContent() == null || noteRequest.getContent().isEmpty()) {
-            throw new RuntimeException(Constans.NOTE_CONTENT_REQUIRED);
+            throw new NoteValidationException(Constans.NOTE_CONTENT_REQUIRED);
         }
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(Constans.USER_NOT_FOUND + username));
+                .orElseThrow(() -> new UserNotFoundException(Constans.USER_NOT_FOUND + username));
 
         Note note = new Note();
         note.setTitle(noteRequest.getTitle());
@@ -99,10 +121,10 @@ public class NoteServiceImpl implements NoteService {
     @Transactional
     public NoteResponse update(Long id, NoteRequest noteRequest, String username) {
         Note existingNote = noteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException(Constans.NOTE_NOT_FOUND + id));
+                .orElseThrow(() -> new NoteNotFoundException(Constans.NOTE_NOT_FOUND + id));
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException(Constans.USER_NOT_FOUND + username));
+                .orElseThrow(() -> new UserNotFoundException(Constans.USER_NOT_FOUND + username));
 
         existingNote.setTitle(noteRequest.getTitle());
         existingNote.setContent(noteRequest.getContent());
@@ -117,6 +139,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public void delete(Long id) {
+        noteRepository.findById(id)
+                .orElseThrow(() -> new NoteNotFoundException(Constans.NOTE_NOT_FOUND + id));
         noteRepository.deleteById(id);
     }
 }
