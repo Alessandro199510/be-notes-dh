@@ -3,8 +3,8 @@ package com.dh.notes.controller;
 import com.dh.notes.dto.requests.NoteRequest;
 import com.dh.notes.dto.responses.NoteResponse;
 import com.dh.notes.dto.responses.PageResponse;
-import com.dh.notes.util.Constans;
 import com.dh.notes.service.NoteService;
+import com.dh.notes.util.Constans;
 import com.dh.notes.util.enums.NoteStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/notes")
-
 public class NoteController {
 
     private final NoteService noteService;
@@ -49,6 +48,13 @@ public class NoteController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Constans.DEFAULT_SORT_BY).descending());
         PageResponse<NoteResponse> response = noteService.findByQueryAndStatusAndUser(pageable, search_query, status, authentication.getName());
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<NoteResponse> getNoteById(@PathVariable Long id) {
+        return noteService.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

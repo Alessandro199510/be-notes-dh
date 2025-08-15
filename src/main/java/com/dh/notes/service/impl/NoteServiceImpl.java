@@ -89,6 +89,7 @@ public class NoteServiceImpl implements NoteService {
         note.setUser(user);
 
         Set<Tag> tags = this.tagsHelper.calcTags(noteRequest.getTags(), user);
+        note.setTags(tags);
 
         Note savedNote = noteRepository.save(note);
         return noteToNoteResponse.map(savedNote);
