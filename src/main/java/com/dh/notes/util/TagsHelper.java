@@ -18,7 +18,7 @@ public class TagsHelper {
         this.tagRepository = tagRepository;
     }
 
-    public Set<Tag> calTags(Set<String> tagsRequest, User user) {
+    public Set<Tag> calcTags(Set<String> tagsRequest, User user) {
         Set<Tag> tags = new HashSet<>();
 
         if (tagsRequest != null) {

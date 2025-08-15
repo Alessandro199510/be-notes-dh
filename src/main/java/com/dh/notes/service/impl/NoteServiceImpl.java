@@ -88,8 +88,7 @@ public class NoteServiceImpl implements NoteService {
         note.setContent(noteRequest.getContent());
         note.setUser(user);
 
-        Set<Tag> tags = this.tagsHelper.calTags(noteRequest.getTags(), user);
-        note.setTags(tags);
+        Set<Tag> tags = this.tagsHelper.calcTags(noteRequest.getTags(), user);
 
         Note savedNote = noteRepository.save(note);
         return noteToNoteResponse.map(savedNote);
@@ -108,7 +107,7 @@ public class NoteServiceImpl implements NoteService {
         existingNote.setContent(noteRequest.getContent());
         existingNote.setStatus(noteRequest.getStatus());
 
-        Set<Tag> tags = this.tagsHelper.calTags(noteRequest.getTags(), user);
+        Set<Tag> tags = this.tagsHelper.calcTags(noteRequest.getTags(), user);
         existingNote.setTags(tags);
 
         Note updatedNote = noteRepository.save(existingNote);

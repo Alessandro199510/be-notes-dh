@@ -1,4 +1,4 @@
-# Notes API Documentation 
+# Notes API Documentation
 
 # 📄 Project Summary
 
@@ -14,7 +14,7 @@ It exposes a RESTful API to manage.
 - Maven
 - Spring Data JPA
 - Hibernate
-- MySQL Database:
+- h2da Database:
 - OpenAPI 3.1 (Swagger)
 
 ## 🌐 API Documentation
@@ -23,12 +23,15 @@ The API documentation is available at after running the application. You can acc
 - [OpenAPI JSON](http://localhost:8080/v3/api-docs)
 - [OpenAPI YAML](http://localhost:8080/v3/api-docs.yaml)
 
+## 📁 H2 Database
+You can access it via the following links:
+- [H2 Console](http://localhost:8080/h2-console)
+
 ## 🔧 Configuration
 ### Prerequisites
 Make sure you have the following components installed:
 - Java Development Kit (JDK) version 21 or higher.
 - Maven.
-- A configured database instance in MySQL.
 
 ### Installation
 1. Clone the repository:
@@ -39,18 +42,12 @@ Make sure you have the following components installed:
    ```bash
    cd notes-api
    ```
-3. Configure the database connection in `src/main/resources/application.properties`:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/your_database
-   spring.datasource.username=your_username
-   spring.datasource.password=your_password
-    ```
-4. Build the project using Maven:
+3. Build the project using Maven:
     ```bash
     mvn clean install
     ```
-6. Run the application:
+4. Run the application:
    ```bash
     mvn spring-boot:run
     ```
-7. The application will start on `http://localhost:8080`.
+5. The application will start on `http://localhost:8080`.
