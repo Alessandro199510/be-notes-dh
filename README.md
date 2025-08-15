@@ -51,3 +51,6 @@ Make sure you have the following components installed:
     mvn spring-boot:run
     ```
 5. The application will start on `http://localhost:8080`.
+
+# Database diagram
+add 
