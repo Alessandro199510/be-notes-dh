@@ -52,5 +52,34 @@ Make sure you have the following components installed:
     ```
 5. The application will start on `http://localhost:8080`.
 
-# Database diagram
-add 
+# DataBase Diagram
+
+```mermaid
+erDiagram
+    USERS ||--o{ NOTES : "write"
+    USERS ||--o{ TAGS : "create"
+    NOTES }o--o{ TAGS : "has"
+
+    USERS {
+        Long id PK "id_usuario"
+        String username
+        String email
+        String password
+        String role
+    }
+
+    NOTES {
+        Long id PK "id_nota"
+        Long user_id FK "ref to USERS"
+        String title
+        String content
+        String status
+        LocalDateTime created_at
+        LocalDateTime updated_at
+    }
+
+    TAGS {
+        Long id PK "id_etiqueta"
+        Long user_id FK "ref to USERS"
+        String name
+    }
