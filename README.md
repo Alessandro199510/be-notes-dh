@@ -83,3 +83,96 @@ erDiagram
         Long user_id FK "ref to USERS"
         String name
     }
+```
+# Diagram components
+```mermaid
+graph TD
+   subgraph Configuration
+      OpenApiConfig
+      SecurityConfig
+      DataInitializer
+   end
+
+   subgraph Controllers
+      AuthController
+      NoteController
+      TagController
+   end
+
+   subgraph DTOs
+      AuthRequest
+      NoteRequest
+      RegisterRequest
+      TagRequest
+      AuthResponse
+      NoteResponse
+      PageResponse
+      TagResponse
+   end
+
+   subgraph Models
+      User
+      Note
+      Tag
+   end
+
+   subgraph Repositories
+      UserRepository
+      NoteRepository
+      TagRepository
+   end
+
+   subgraph Services
+      AuthService
+      NoteService
+      TagService
+      JwtService
+      AuthServiceImpl
+      NoteServiceImpl
+      TagServiceImpl
+      UserDetailsServiceImpl
+   end
+
+   subgraph Utilities
+      Constants
+      TagsHelper
+      JwtAuthFilter
+      NoteStatus
+      NoteToNoteResponse
+      TagToTagResponse
+   end
+
+%% Relationships
+   AuthController --> AuthService
+   NoteController --> NoteService
+   TagController --> TagService
+
+   AuthService --> AuthServiceImpl
+   NoteService --> NoteServiceImpl
+   TagService --> TagServiceImpl
+
+   AuthServiceImpl --> JwtService
+   AuthServiceImpl --> UserRepository
+   NoteServiceImpl --> NoteRepository
+   TagServiceImpl --> TagRepository
+
+   JwtAuthFilter --> JwtService
+   SecurityConfig --> JwtAuthFilter
+
+   NoteServiceImpl --> NoteToNoteResponse
+   TagServiceImpl --> TagToTagResponse
+
+   NoteServiceImpl --> TagsHelper
+   TagServiceImpl --> TagsHelper
+
+   Note --> NoteStatus
+   Note --> Tag
+   Note --> User
+   Tag --> User
+
+   DataInitializer --> UserRepository
+   DataInitializer --> NoteRepository
+   DataInitializer --> TagRepository
+
+
+```
