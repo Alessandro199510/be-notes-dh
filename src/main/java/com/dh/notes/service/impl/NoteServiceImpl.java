@@ -108,6 +108,7 @@ public class NoteServiceImpl implements NoteService {
         Note note = new Note();
         note.setTitle(noteRequest.getTitle());
         note.setContent(noteRequest.getContent());
+        note.setStatus(noteRequest.getStatus());
         note.setUser(user);
 
         Set<Tag> tags = this.tagsHelper.calcTags(noteRequest.getTags(), user);
